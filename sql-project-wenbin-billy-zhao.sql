@@ -1,178 +1,211 @@
-use sakila;
+USE sakila;
 
--- question 1a
-select first_name, last_name from actor;
+-- question 1a - Display the first and last names of all actors FROM the table actor
+SELECT first_name, last_name FROM actor;
 
--- question 1b
-select concat(concat(substring(first_name, 1, 1), lower(substring(first_name, 2))), " ",
+-- question 1b - Display the first and last name of each actor in a single column in upper case letters. Name the column Actor Name
+SELECT concat(upper(first_name), ' ', upper(last_name)) as 'Full Name'
+FROM actor
+
+-- question 1b bonus - I used the following function to normalize (proper) full name to show its proper form
+-- good to write up a function for future use
+SELECT concat(concat(substring(first_name, 1, 1), lower(substring(first_name, 2))), " ",
 	   concat(substring(last_name, 1, 1), lower(substring(last_name, 2)))) as Name
-from actor
+FROM actor;
 
--- question 2a
-select actor_id, first_name, last_name
-from actor
-where first_name = 'Joe'
+-- question 2a - You need to find the ID number, first name, and last name of an actor, 
+-- of whom you know only the first name, "Joe." What is one query would you use to obtain this information?
+SELECT actor_id, first_name, last_name
+FROM actor
+WHEREfirst_name = 'Joe';
 
--- question 2b
-select * 
-from actor
-where last_name like "%Gen%"
+-- question 2b - Find all actors whose last name contain the letters GEN:
+SELECT * 
+FROM actor
+WHERElast_name LIKE "%Gen%";
 
--- question 2c
-select *
-from actor
-where last_name like "%Li%" 
-order by last_name, first_name
+-- question 2c - Find all actors whose last names contain the letters LI. 
+-- This time, order the rows by last name and first name, in that order:
+SELECT *
+FROM actor
+WHERElast_name LIKE "%Li%" 
+ORDER BY last_name, first_name;
 
--- question 2d
-select country_id, country
-from country
-where country in ("Afghanistan", "Bangladesh", "China")
+-- question 2d -  Using IN, display the country_id and country columns of the following countries: 
+-- Afghanistan, Bangladesh, and China:
+SELECT country_id, country
+FROM country
+WHEREcountry IN ("Afghanistan", "Bangladesh", "China");
 
--- question 3a
-alter table actor
-add (Description blob)
+-- question 3a -  You want to keep a description of each actor. You don't think you will be performing queries on a description, 
+-- so create a column in the table actor named description and use the data type BLOB 
+-- (Make sure to research the type BLOB, as the difference between it and VARCHAR are significant).
+ALTER table actor
+add (Description BLOB);
 
--- question 3b
-alter table actor
-drop column description
+-- question 3b - Very quickly you realize that entering descriptions for each actor is too much effort. Delete the description column.
+ALTER table actor
+DROP column description;
 
--- question 4a
-select count(last_name), last_name
-from actor
-group by last_name
+-- question 4a - List the last names of actors, as well as how many actors have that last name.
+SELECT count(last_name) as nameCount, last_name
+FROM actor
+GROUP BY last_name;
 
--- question 4b
-select count(last_name) sameName, last_name
-from actor
-group by last_name
-having sameName >= 2
+-- question 4b - List last names of actors and the number of actors who have that last name, 
+-- but only for names that are shared by at least two actors
+SELECT COUNT(last_name) sameName, last_name
+FROM actor
+GROUP BY last_name
+HAVING sameName >= 2;
 
--- question 4c
-update actor
-set first_name = 'Harpo'
-where first_name = 'Groucho'
+-- question 4c - The actor HARPO WILLIAMS was accidentally entered in the actor table as GROUCHO WILLIAMS. Write a query to fix the record.
+UPDATE actor
+SET first_name = 'Harpo'
+WHEREfirst_name = 'Groucho';
 
--- question 4d
-update actor
-set first_name = 'Groucho'
-where first_name = 'Harpo'
+-- question 4d - Perhaps we were too hasty in changing GROUCHO to HARPO. It turns out that GROUCHO was the correct name after all! 
+-- In a single query, if the first name of the actor is currently HARPO, change it to GROUCHO.
+UPDATE actor
+SET first_name = 'Groucho'
+WHEREfirst_name = 'Harpo';
 
--- question 5a
-show create table address
+-- question 5a - You cannot locate the schema of the address table. Which query would you use to re-create it?
+SHOW CREATE TABLE address;
 
--- question 6a
-select first_name, last_name, address 
-from staff a
-left join address b 
-on a.address_id = b.address_id
+## alternative to describe a table as Explain or Describe
+EXPLAIN address;
 
--- question 6b
-select last_name, first_name, sum(amount)
-from staff a
-left join payment b
-on a.staff_id = b.staff_id
+-- question 6a - Use JOIN to display the first and last names, as well as the address, 
+-- of each staff member. Use the tables staff and address:
+SELECT first_name, last_name, address 
+FROM staff a
+left JOIN address b 
+ON a.address_id = b.address_id;
 
--- question 6c
-select title, count(actor_id)
-from film a
-inner join film_actor b
+-- question 6b - Use JOIN to display the total amount rung up by each staff member in August of 2005. 
+-- Use tables staff and payment.
+SELECT a.last_name, a.first_name, sum(b.amount)
+FROM staff a
+left JOIN payment b
+ON a.staff_id = b.staff_id
+GROUP BY a.last_name;
+
+-- question 6c - List each film and the number of actors who are listed for that film. Use tables film_actor and film. Use inner join.
+SELECT title, count(actor_id)
+FROM film a
+inner JOIN film_actor b
 on a.film_id = b.film_id
-group by title
+GROUP BY title;
 
--- question 6d
-select b.title, count(a.inventory_id) as Copies
-from inventory a
-join film b
+-- question 6d - How many copies of the film Hunchback Impossible exist in the inventory system?
+SELECT b.title, count(a.inventory_id) as Copies
+FROM inventory a
+JOIN film b
 on a.film_id = b.film_id
-where b.title = 'Hunchback Impossible'
+WHEREb.title = 'Hunchback Impossible';
 
--- question 6e
-select first_name, last_name, sum(amount)
-from customer a
-join payment b on a.customer_id = b.customer_id
-group by first_name, last_name
-order by last_name
+-- question 6e - Using the tables payment and customer and the JOIN command, 
+-- list the total paid by each customer. List the customers alphabetically by last name:
+SELECT first_name, last_name, sum(amount)
+FROM customer a
+JOIN payment b on a.customer_id = b.customer_id
+GROUP BY first_name, last_name
+ORDER BY last_name;
 
--- question 7a
-select 
-from film
-where 
-
--- question 7b
-select first_name, last_name 
-from actor a
-join film_actor b
-on a.actor_id = b.actor_id
-where b.film_id = (select film_id from film where title = 'Alone Trip')
-
--- question 7c
-select first_name, last_name, email, country
-from customer a
-join address b on a.address_id = b.address_id
-join city c on b.city_id = c.city_id
-join country d on c.country_id = d.country_id
-where d.country = 'Canada'
-
--- question 7d - Sales have been lagging among young families, and you wish to target all family movies for a promotion. Identify all movies categorized as family films.
-select title, description, rating, release_year, name as 'type'
-from film a
-join film_category b on a.film_id = b.film_id
-join category c on b.category_id = c.category_id
-where c.name = 'Family'
-
--- question 7e - Display the most frequently rented movies in descending order.
-select c.title, count(a.inventory_id) as rentalCount
-from rental a
-join inventory b on a.inventory_id = b.inventory_id
-join film c on b.film_id = c.film_id
-group by c.title
-order by rentalcount desc
-
--- question 7f - Write a query to display how much business, in dollars, each store brought in
-select c.store_id as StoreID, sum(a.amount)
-from payment a
-join staff b on a.staff_id = b.staff_id
-join store c on b.store_id = c.store_id
-group by c.store_id
-
--- question 7g - Write a query to display for each store its store ID, city, and country.
-select a.store_id, c.city, d.country
-from store a 
-join address b on a.address_id = b.address_id
-join city c on b.city_id = c.city_id
-join country d on c.country_id = d.country_id
-
--- question 7h - List the top five genres in gross revenue in descending order. (Hint: you may need to use the following tables: category, film_category, inventory, payment, and rental.)
-select e.name as filmCategory, sum(a.amount) as totalRevenue
-from payment a
-join rental b on a.rental_id = b.rental_id
-join inventory c on b.inventory_id = c.inventory_id
-join film_category d on c.film_id = d.film_id
-join category e on d.category_id = e.category_id
-group by filmcategory
-order by totalrevenue desc
-
--- question 8a - In your new role as an executive, you would like to have an easy way of viewing the Top five genres by gross revenue. 
--- Use the solution from the problem above to create a view. If you haven't solved 7h, you can substitute another query to create a view.
--- reference: https://dev.mysql.com/doc/refman/8.0/en/create-view.html
-create view v_top_five_genres
-as (
-	select e.name as filmCategory, sum(a.amount) as totalRevenue
-	from payment a
-	join rental b on a.rental_id = b.rental_id
-	join inventory c on b.inventory_id = c.inventory_id
-	join film_category d on c.film_id = d.film_id
-	join category e on d.category_id = e.category_id
-	group by filmcategory
-	order by totalrevenue desc
-	limit 5
+-- question 7a - The music of Queen and Kris Kristofferson have seen an unlikely resurgence. As an unintended consequence, 
+-- films starting with the letters K and Q have also soared in popularity. Use subqueries to display the titles of movies 
+-- starting with the letters K and Q whose language is English.
+SELECT title
+FROM film a
+WHEREtitle like 'K%'or title like 'Q%'
+and a.language_id = (
+	SELECT language_id FROM `language` WHEREname = 'English'
 )
 
+-- question 7b - Use subqueries to display all actors who appear in the film Alone Trip.
+SELECT first_name, last_name 
+FROM actor
+WHEREactor_id IN (
+	SELECT actor_id FROM film_actor 
+	WHEREfilm_id = (
+		SELECT film_id FROM film WHEREtitle = 'Alone Trip'
+	)
+)
 
--- 8b - How would you display the view that you created in 8a?
-select * from v_top_five_genres
+-- question 7c - You want to run an email marketing campaign in Canada, 
+-- for which you will need the names and email addresses of all Canadian customers. Use joins to retrieve this information.
+SELECT first_name, last_name, email, country
+FROM customer a
+JOIN address b on a.address_id = b.address_id
+JOIN city c on b.city_id = c.city_id
+JOIN country d on c.country_id = d.country_id
+WHERE d.country = 'Canada'
 
--- 8c - You find that you no longer need the view top_five_genres. Write a query to delete it.
--- https://dev.mysql.com/doc/refman/8.0/en/drop-view.html
-drop view if exists v_top_five_genres
+-- question 7d - Sales have been lagging among young families, and you wish to target all family movies for a promotion. Identify all movies categorized as family films.
+-- comment: no wonder the sales are lagging. The data set is bad. NC-17 and R rated movies were marked as family movies.
+SELECT title, description, rating, release_year, name as 'type'
+FROM film a
+JOIN film_category b on a.film_id = b.film_id
+JOIN category c on b.category_id = c.category_id
+WHERE c.name = 'Family'
+
+-- question 7e - Display the most frequently rented movies in descending order.
+SELECT c.title, COUNT(a.inventory_id) as rentalCount
+FROM rental a
+JOIN inventory b on a.inventory_id = b.inventory_id
+JOIN film c on b.film_id = c.film_id
+GROUP BY c.title
+ORDER BY rentalcount desc
+
+-- question 7f - Write a query to display how much business, in dollars, each store brought in
+SELECT c.store_id as StoreID, SUM(a.amount)
+FROM payment a
+JOIN staff b on a.staff_id = b.staff_id
+JOIN store c on b.store_id = c.store_id
+GROUP BY c.store_id
+
+-- question 7g - Write a query to display for each store its store ID, city, and country.
+SELECT a.store_id, c.city, d.country
+FROM store a 
+JOIN address b on a.address_id = b.address_id
+JOIN city c on b.city_id = c.city_id
+JOIN country d on c.country_id = d.country_id
+
+-- question 7h - List the top five genres in gross revenue in descending order. (Hint: you may need to use the following tables: category, film_category, inventory, payment, and rental.)
+SET @rownum = 0;
+
+SELECT e.name as filmCategory, SUM(a.amount) as totalRevenue
+FROM payment a
+JOIN rental b on a.rental_id = b.rental_id
+JOIN inventory c on b.inventory_id = c.inventory_id
+JOIN film_category d on c.film_id = d.film_id
+JOIN category e on d.category_id = e.category_id
+GROUP BY filmcategory
+ORDER BY totalrevenue DESC
+LIMIT 5;
+
+-- question 8a - In your new role as an executive, you would like to have an easy way of VIEWing the Top five genres by gross revenue. 
+-- Use the solution FROM the problem above to CREATE a VIEW. If you haven't solved 7h, you can substitute another query to CREATE a VIEW.
+-- reference: https://dev.mysql.com/doc/refman/8.0/en/CREATE-VIEW.html
+CREATE VIEW v_top_five_genres
+as (
+	SELECT e.name as filmCategory, sum(a.amount) as totalRevenue
+	FROM payment a
+	JOIN rental b on a.rental_id = b.rental_id
+	JOIN inventory c on b.inventory_id = c.inventory_id
+	JOIN film_category d on c.film_id = d.film_id
+	JOIN category e on d.category_id = e.category_id
+	GROUP BY filmcategory
+	ORDER BY totalrevenue desc
+	LIMIT 5
+);
+
+-- 8b - How would you display the VIEW that you CREATEd in 8a?
+SELECT * FROM v_top_five_genres;
+
+-- 8c - You find that you no longer need the VIEW top_five_genres. Write a query to delete it.
+-- https://dev.mysql.com/doc/refman/8.0/en/DROP-VIEW.html
+DROP VIEW if exists v_top_five_genres;
+
+
