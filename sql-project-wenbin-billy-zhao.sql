@@ -17,25 +17,25 @@ FROM actor;
 -- of whom you know only the first name, "Joe." What is one query would you use to obtain this information?
 SELECT actor_id, first_name, last_name
 FROM actor
-WHEREfirst_name = 'Joe';
+WHERE first_name = 'Joe';
 
 -- question 2b - Find all actors whose last name contain the letters GEN:
 SELECT * 
 FROM actor
-WHERElast_name LIKE "%Gen%";
+WHERE last_name LIKE "%Gen%";
 
 -- question 2c - Find all actors whose last names contain the letters LI. 
 -- This time, order the rows by last name and first name, in that order:
 SELECT *
 FROM actor
-WHERElast_name LIKE "%Li%" 
+WHERE last_name LIKE "%Li%" 
 ORDER BY last_name, first_name;
 
 -- question 2d -  Using IN, display the country_id and country columns of the following countries: 
 -- Afghanistan, Bangladesh, and China:
 SELECT country_id, country
 FROM country
-WHEREcountry IN ("Afghanistan", "Bangladesh", "China");
+WHERE country IN ("Afghanistan", "Bangladesh", "China");
 
 -- question 3a -  You want to keep a description of each actor. You don't think you will be performing queries on a description, 
 -- so create a column in the table actor named description and use the data type BLOB 
@@ -62,13 +62,13 @@ HAVING sameName >= 2;
 -- question 4c - The actor HARPO WILLIAMS was accidentally entered in the actor table as GROUCHO WILLIAMS. Write a query to fix the record.
 UPDATE actor
 SET first_name = 'Harpo'
-WHEREfirst_name = 'Groucho';
+WHERE first_name = 'Groucho';
 
 -- question 4d - Perhaps we were too hasty in changing GROUCHO to HARPO. It turns out that GROUCHO was the correct name after all! 
 -- In a single query, if the first name of the actor is currently HARPO, change it to GROUCHO.
 UPDATE actor
 SET first_name = 'Groucho'
-WHEREfirst_name = 'Harpo';
+WHERE first_name = 'Harpo';
 
 -- question 5a - You cannot locate the schema of the address table. Which query would you use to re-create it?
 SHOW CREATE TABLE address;
@@ -103,7 +103,7 @@ SELECT b.title, count(a.inventory_id) as Copies
 FROM inventory a
 JOIN film b
 on a.film_id = b.film_id
-WHEREb.title = 'Hunchback Impossible';
+WHERE b.title = 'Hunchback Impossible';
 
 -- question 6e - Using the tables payment and customer and the JOIN command, 
 -- list the total paid by each customer. List the customers alphabetically by last name:
@@ -118,18 +118,18 @@ ORDER BY last_name;
 -- starting with the letters K and Q whose language is English.
 SELECT title
 FROM film a
-WHEREtitle like 'K%'or title like 'Q%'
+WHERE title like 'K%'or title like 'Q%'
 and a.language_id = (
-	SELECT language_id FROM `language` WHEREname = 'English'
+	SELECT language_id FROM `language` WHERE name = 'English'
 )
 
 -- question 7b - Use subqueries to display all actors who appear in the film Alone Trip.
 SELECT first_name, last_name 
 FROM actor
-WHEREactor_id IN (
+WHERE actor_id IN (
 	SELECT actor_id FROM film_actor 
-	WHEREfilm_id = (
-		SELECT film_id FROM film WHEREtitle = 'Alone Trip'
+	WHERE film_id = (
+		SELECT film_id FROM film WHERE title = 'Alone Trip'
 	)
 )
 
@@ -173,8 +173,6 @@ JOIN city c on b.city_id = c.city_id
 JOIN country d on c.country_id = d.country_id
 
 -- question 7h - List the top five genres in gross revenue in descending order. (Hint: you may need to use the following tables: category, film_category, inventory, payment, and rental.)
-SET @rownum = 0;
-
 SELECT e.name as filmCategory, SUM(a.amount) as totalRevenue
 FROM payment a
 JOIN rental b on a.rental_id = b.rental_id
