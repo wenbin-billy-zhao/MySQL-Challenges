@@ -1,3 +1,5 @@
+/* The following SQL queries are a series of exercises practicing various concepts of SQL methods */ 
+
 USE sakila;
 
 -- question 1a - Display the first and last names of all actors FROM the table actor
