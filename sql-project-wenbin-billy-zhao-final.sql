@@ -100,7 +100,7 @@ on a.film_id = b.film_id
 GROUP BY title;
 
 -- question 6d - How many copies of the film Hunchback Impossible exist in the inventory system?
-SELECT b.title, count(a.inventory_id) as Copies
+SELECT b.title, count(a.inventory_id) as Copiespe
 FROM inventory a
 JOIN film b
 on a.film_id = b.film_id
@@ -176,11 +176,12 @@ ORDER BY rentalcount DESC;
 
 -- question 7f - Write a query to display how much business, in dollars, each store brought in
 -- alternatively, you can join payment -> rental -> inventory - this will produce a slightly different result
-SELECT c.store_id as StoreID, SUM(a.amount)
+SELECT c.store_id as StoreID, SUM(a.amount) AS Gross
 FROM payment a
-JOIN staff b on a.staff_id = b.staff_id
-JOIN store c on b.store_id = c.store_id
-GROUP BY c.store_id;
+JOIN rental b ON a.rental_id = b.rental_id
+JOIN inventory c ON b.inventory_id = c.inventory_id
+JOIN store d ON c.store_id = d.store_id 
+GROUP BY d.store_id;
 
 -- question 7g - Write a query to display for each store its store ID, city, and country.
 SELECT a.store_id, c.city, d.country
